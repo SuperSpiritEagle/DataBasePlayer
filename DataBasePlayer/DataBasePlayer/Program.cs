@@ -46,7 +46,7 @@ namespace DataBasePlayer
                         break;
 
                     case CommandBannedPlayer:
-                        dataBase.BannedPlayer();
+                        dataBase.BanPlayer();
                         break;
 
                     case CommandUnbanPlayer:
@@ -108,7 +108,7 @@ namespace DataBasePlayer
             Console.WriteLine("Введите Nick игрока");
             userInput = Console.ReadLine();
 
-            Console.WriteLine("Введите статус игрока [true] = not banned [false] = banned");
+            Console.WriteLine("Введите статус игрока [true] = Unban [false] = Ban");
             bool.TryParse(Console.ReadLine(), out bool status);
 
             _players.Add(new Player(identifier, userInput, status));
@@ -133,12 +133,12 @@ namespace DataBasePlayer
             }
         }
 
-        public void BannedPlayer()
+        public void BanPlayer()
         {
             if (TryGetPlayer(out Player player))
             {
                 player.Ban();
-                Console.WriteLine("Banned");
+                Console.WriteLine("Ban");
             }
         }
 
