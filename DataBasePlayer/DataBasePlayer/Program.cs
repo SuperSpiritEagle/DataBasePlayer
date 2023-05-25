@@ -9,9 +9,10 @@ namespace DataBasePlayer
         {
             const string CommandAddPlayer = "1";
             const string CommandDeletePlayer = "2";
-            const string CommandShowPlayer = "3";
-            const string CommandStatusPlayer = "4";
-            const string CommandExit = "5";
+            const string CommandShowPlayers = "3";
+            const string CommandBannedPlayer = "4";
+            const string CommandUnbanPlayer = "5";
+            const string CommandExit = "6";
 
             DataBase dataBase = new DataBase();
 
@@ -22,8 +23,9 @@ namespace DataBasePlayer
                 Console.WriteLine($"\n   База данных\n" +
                     $"\n [{CommandAddPlayer}] Добавить игрока" +
                     $"\n [{CommandDeletePlayer}] Удалить игрока" +
-                    $"\n [{CommandShowPlayer}] Показать игрока" +
-                    $"\n [{CommandStatusPlayer}] Статус игрока" +
+                    $"\n [{CommandShowPlayers}] Показать игроков" +
+                    $"\n [{CommandBannedPlayer}] Забанить игрока" +
+                    $"\n [{CommandUnbanPlayer}] Разбанить игрока" +
                     $"\n [{CommandExit}] Выход");
 
                 string userInput = Console.ReadLine();
@@ -39,12 +41,16 @@ namespace DataBasePlayer
                         dataBase.DeletePlayer();
                         break;
 
-                    case CommandShowPlayer:
+                    case CommandShowPlayers:
                         dataBase.ShowPlayers();
                         break;
 
-                    case CommandStatusPlayer:
-                        dataBase.StatusPlayer();
+                    case CommandBannedPlayer:
+                        dataBase.BannedPlayer();
+                        break;
+
+                    case CommandUnbanPlayer:
+                        dataBase.UnbanPlayer();
                         break;
 
                     case CommandExit:
@@ -62,25 +68,31 @@ namespace DataBasePlayer
 
     class Player
     {
-        public string Identifier { get; private set; }
-        public string Nickname { get; private set; }
-        public bool Status { get; private set; }
+        private string _nickname;
 
-        public Player(string identifier, string nik, bool status)
+        public Player(string identifier, string nickname, bool status)
         {
             Identifier = identifier;
-            Nickname = nik;
+            _nickname = nickname;
             Status = status;
         }
 
+        public string Identifier { get; private set; }
+        public bool Status { get; private set; }
+
         public void ShowInfo()
         {
-            Console.WriteLine($"ID = {Identifier} , Nik = {Nickname} , Status = {Status}");
+            Console.WriteLine($"ID = {Identifier} , Nick = {_nickname} , Status = {Status}");
         }
 
-        public bool SetStatus(bool status)
+        public bool Banned()
         {
-            return Status = status;
+            return Status = false;
+        }
+
+        public bool Unban()
+        {
+            return Status = true;
         }
     }
 
@@ -93,7 +105,7 @@ namespace DataBasePlayer
             string identifier = CreateIdentifier();
             string userInput;
 
-            Console.WriteLine("Введите Nik игрока");
+            Console.WriteLine("Введите Nick игрока");
             userInput = Console.ReadLine();
 
             Console.WriteLine("Введите статус игрока [true] = not banned [false] = banned");
@@ -104,60 +116,78 @@ namespace DataBasePlayer
 
         public void ShowPlayers()
         {
-            for (int i = 0; i < _players.Count; i++)
-            {
-                _players[i].ShowInfo();
-            }
+            if (PlayersCount() > 0)
+
+                for (int i = 0; i < _players.Count; i++)
+                {
+                    _players[i].ShowInfo();
+                }
         }
 
         public void DeletePlayer()
         {
-            ShowPlayers();
-
-            Console.WriteLine("Введите ID игрока");
-            string userInput = Console.ReadLine();
-
-            for (int i = 0; i < _players.Count; i++)
+            if (TryGetPlayer(out Player player))
             {
-                if (userInput == _players[i].Identifier)
+                _players.Remove(player);
+                Console.WriteLine("Игрок удален");
+            }
+        }
+
+        public void BannedPlayer()
+        {
+            if (TryGetPlayer(out Player player))
+            {
+                player.Banned();
+                Console.WriteLine("Banned");
+            }
+        }
+
+        public void UnbanPlayer()
+        {
+            if (TryGetPlayer(out Player player))
+            {
+                player.Unban();
+                Console.WriteLine("Unban");
+            }
+        }
+
+        private bool TryGetPlayer(out Player player)
+        {
+            player = null;
+
+            if (PlayersCount() > 0)
+            {
+                ShowPlayers();
+
+                Console.WriteLine("Введите ID игрок");
+                string userInput = Console.ReadLine();
+
+                for (int i = 0; i < _players.Count; i++)
                 {
-                    _players.Remove(_players[i]);
-                    Console.WriteLine("Игрок удален");
+                    if (_players[i].Identifier == userInput)
+                    {
+                        player = _players[i];
+                        return true;
+                    }
                 }
-                else
+
+                if (player == null)
                 {
                     Console.WriteLine("Игрок не найден");
                 }
             }
+
+            return false;
         }
 
-        public void StatusPlayer()
+        private int PlayersCount()
         {
-            ShowPlayers();
-
-            Console.WriteLine("Введите ID игрок");
-            string userInput = Console.ReadLine();
-
-            for (int i = 0; i < _players.Count; i++)
+            if (_players.Count <= 0)
             {
-                if (userInput == _players[i].Identifier)
-                {
-                    Console.WriteLine("Введите статус игрока true или false");
-
-                    bool.TryParse(Console.ReadLine(), out bool status);
-
-                    if (status == true)
-                    {
-                        Console.WriteLine("Игрок разбанен");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Игоко забанен");
-                    }
-
-                    _players[i].SetStatus(status);
-                }
+                Console.WriteLine("База данных пуста");
             }
+
+            return _players.Count;
         }
 
         private string CreateIdentifier()
