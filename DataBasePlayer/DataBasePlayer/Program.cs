@@ -85,14 +85,14 @@ namespace DataBasePlayer
             Console.WriteLine($"ID = {Identifier} , Nick = {_nickname} , Status = {Status}");
         }
 
-        public bool Banned()
+        public void Ban()
         {
-            return Status = false;
+            Status = false;
         }
 
-        public bool Unban()
+        public void Unban()
         {
-            return Status = true;
+            Status = true;
         }
     }
 
@@ -116,7 +116,7 @@ namespace DataBasePlayer
 
         public void ShowPlayers()
         {
-            if (PlayersCount() > 0)
+            if (CheckLengh() > 0)
 
                 for (int i = 0; i < _players.Count; i++)
                 {
@@ -137,7 +137,7 @@ namespace DataBasePlayer
         {
             if (TryGetPlayer(out Player player))
             {
-                player.Banned();
+                player.Ban();
                 Console.WriteLine("Banned");
             }
         }
@@ -155,7 +155,7 @@ namespace DataBasePlayer
         {
             player = null;
 
-            if (PlayersCount() > 0)
+            if (CheckLengh() > 0)
             {
                 ShowPlayers();
 
@@ -180,7 +180,7 @@ namespace DataBasePlayer
             return false;
         }
 
-        private int PlayersCount()
+        private int CheckLengh()
         {
             if (_players.Count <= 0)
             {
